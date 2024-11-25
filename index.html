@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATH TIC TAC</title>
+    <style>
+        body {  
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #f06, #ffabab);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 350px;
+        }
+
+        h1 {
+            font-size: 31.5px;
+            margin-bottom: 0px;
+            color: #9a0f6c;
+        }
+
+        h2 {
+            font-size: 17px;
+            margin-top: 0px;
+            color: #9a0f6c;
+        }
+
+        label {
+            font-size: 14px;
+            color: #75085f;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin-top: 20px;
+            margin-left: 14px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            border: 2px solid #ffffff;
+            background-color: #88004d;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .cell:hover {
+            background-color: #ff1c99;
+            transform: scale(1.1);
+        }
+
+        .cell.taken {
+            pointer-events: none;
+            background-color: #555555;
+        }
+
+        .message {
+            color: #000000;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            padding: 5px;
+            font-size: 13px;
+            margin-left: 10px;
+            border-radius: 7px;
+            border: 2px solid hsl(322, 100%, 91%);
+        }
+
+        button {
+            background-color: #7e164a;
+            color: rgb(255, 255, 255);
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #fd56a4;
+        }
+
+        button:active {
+            background-color: #09cb26;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>MATH TIC TAC</h1>
+        <h2>Mathematics & Tic Tac Toe</h2>
+        <div>
+            <label for="difficulty">Pilih tingkat kesulitan (1-7):</label>
+            <input type="number" id="difficulty" min="1" max="7" value="1">
+        </div>
+        <div class="board" id="board">
+        </div>
+        <div class="message" id="message"></div>
+        <button id="resetButton">Reset Game</button>
+    </div>
+
+
+    <script>
+        // Inisialisasi variabel permainan
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+        const difficultyInput = document.getElementById('difficulty');
+        const resetButton = document.getElementById('resetButton');
+        let currentPlayer = 'X';
+        let board = Array(9).fill(null);
+        let gameOver = false;
+        let difficulty = parseInt(difficultyInput.value);
+
+        difficultyInput.addEventListener('change', (e) => {
+            difficulty = parseInt(e.target.value);
+            resetGame();
+        });
+
+        // Membuat kotak Tic Tac Toe
+        function createBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((_, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = index;
+                cell.addEventListener('click', () => handleCellClick(index));
+                boardElement.appendChild(cell);
+            });
+        }
+
+        // Klik sel
+        function handleCellClick(index) {
+            if (board[index] || gameOver) return; // Skip if cell is already filled or game over
+
+            // Soal Matematika
+            askMathQuestion(index);
+        }
+
+        // Soal matematika berdasarkan tingkat kesulitan
+        function askMathQuestion(index) {
+            const answer = generateMathQuestion(difficulty);
+            const userAnswer = prompt(`Pemain ${currentPlayer}, Kerjakan ini: ${answer.question}`);
+            
+            if (parseInt(userAnswer) === answer.correctAnswer) {
+                // Jawaban benar, isi sel
+                board[index] = currentPlayer;
+                document.querySelector(`.cell[data-index="${index}"]`).textContent = currentPlayer;
+                checkGameStatus();
+            } else {
+                // Jawaban salah
+                messageElement.textContent = `Pemain ${currentPlayer} 
+                menjawab salah, sekarang giliran Pemain ${currentPlayer === 'X' ? 'O' : 'X'}.`;
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+
+        // Soal matematika berdasarkan tingkat kesulitan
+        function generateMathQuestion(difficulty) {
+            let question = '';
+            let correctAnswer = 0;
+
+            if (difficulty === 1) {
+                const num1 = Math.floor(Math.random() * 20);
+                const num2 = Math.floor(Math.random() * 20);
+                question = `${num1} + ${num2}`;
+                correctAnswer = num1 + num2;
+            } else if (difficulty === 2) {
+                const num1 = Math.floor(Math.random() * 50);
+                const num2 = Math.floor(Math.random() * 50);
+                question = `${num1} - ${num2}`;
+                correctAnswer = num1 * num2;
+            } else if (difficulty === 3) {
+                const num1 = Math.floor(Math.random() * 70);
+                const num2 = Math.floor(Math.random() * 60);
+                question = `${num1} * ${num2}`;
+                correctAnswer = num1 * num2;
+            } else if (difficulty === 4) {
+                const num1 = Math.floor(Math.random() * 100);
+                const num2 = Math.floor(Math.random() * 100);
+                const num3 = Math.floor(Math.random() * 50);
+                const num4 = Math.floor(Math.random() * 20);
+                question = `${num1} * ${num2} + ${num4}(${num3})`;
+                correctAnswer = num1 * num2 + num4 * num3;
+            } else if (difficulty === 5) {
+                const trigFunc = Math.random() < 0.5 ? 'sin' : 'cos'; // Randomly choose sin or cos
+                const coefficient = Math.floor(Math.random() * 5) + 1; // Random coefficient for x
+                const questionAngle = Math.floor(Math.random() * 10) + 1; // Random angle multiplier
+                question = `∫ ${coefficient} * ${trigFunc}(${questionAngle}x) dx`;
+
+                // If the function is sin or cos, the integral is straightforward
+                if (trigFunc === 'sin') {
+                // Integral of sin(kx) is (-1/k) * cos(kx) + C
+                    correctAnswer = -1 / questionAngle * coefficient;
+                } else {
+                 // Integral of cos(kx) is (1/k) * sin(kx) + C
+                    correctAnswer = 1 / questionAngle * coefficient;
+                }
+            } else if (difficulty === 6) {
+                // Integral Lipat Dua: Pilih fungsi f(x, y) sederhana
+                const a = Math.floor(Math.random() * 3) + 1; // Random coefficient for x
+                const b = Math.floor(Math.random() * 3) + 1; // Random coefficient for y
+                const c = Math.floor(Math.random() * 3) + 1; // Random constant for y
+                const d = Math.floor(Math.random() * 3) + 1; // Random constant for x
+                // Misalnya soal integral ganda f(x, y) = (a*x + b*y)
+                question = `∫∫ (${a}x + ${b}y) dx dy`;
+
+                // Menghitung hasil integral lipat dua untuk f(x, y) = a*x + b*y
+                // Integral pertama terhadap x: ∫ (a*x + b*y) dx = (a/2)*x^2 + b*y*x
+                // Integral kedua terhadap y: ∫ ((a/2)*x^2 + b*y*x) dy = (a/2)*x^2*y + b*x*(y^2/2)
+        
+                // Ambil batas atas dan bawah untuk x dan y
+                const xLower = 0, xUpper = 2; // batas x
+                const yLower = 0, yUpper = 2; // batas y
+
+                // Menghitung hasil integral dengan batas
+                const xResult = ((a / 2) * Math.pow(xUpper, 2) + b * (xUpper * yUpper)) 
+                - ((a / 2) * Math.pow(xLower, 2) + b * (xLower * yUpper));
+                const yResult = ((a / 2) * Math.pow(xUpper, 2) * yUpper + b * xUpper 
+                * Math.pow(yUpper, 2)) - ((a / 2) * Math.pow(xLower, 2) * yUpper + b * xLower * Math.pow(yUpper, 2));
+        
+                correctAnswer = yResult - xResult;
+            } else if (difficulty === 7) {
+                const num1 = Math.floor(Math.random() * 70);
+                const num2 = Math.floor(Math.random() * 60);
+                question = `Utamakan kesehatan.`;
+                correctAnswer = num1 * num2;
+            }
+            return { question, correctAnswer };
+        }
+
+        // Mengecek menang atau seri
+        function checkGameStatus() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical
+                [0, 4, 8], [2, 4, 6]             // Diagonal
+            ];
+
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    gameOver = true;
+                    messageElement.textContent = `HOREEE! PEMAIN ${currentPlayer} 
+                    MENANG! SELAMAT YAAAA:D \njangan sombong, mentang-mentang menang`;
+                    return;
+                }
+            }
+
+            if (board.every(cell => cell)) {
+                gameOver = true;
+                messageElement.textContent = 'WOWWW SERII, AYO COBA LAGI!';
+            }
+
+            if (!gameOver) {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+
+        // Reset the game
+        function resetGame() {
+            board = Array(9).fill(null);
+            gameOver = false;
+            createBoard();
+            messageElement.textContent = '';
+            currentPlayer = 'X';
+        }
+
+        // Initialize the game board on page load
+        createBoard();
+
+        // fungsi tombol reset 
+        resetButton.addEventListener('click', resetGame);
+
+    </script>
+</body>
+</html>
